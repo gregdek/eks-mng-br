@@ -1,3 +1,4 @@
+
 # Setup EKS Managed Node Groups with Bottlerocket using Launch Templates
 
 ## Introduction
@@ -26,7 +27,7 @@ After creating your cluster with eksctl, we will ask you to move to the AWS mana
 
 Creating the initial cluster can take time. Once the cluster is created, sign into the console, select the “Elastic Kubernetes Service”, and under “Amazon EKS” on the left nav, click on “Clusters”. You should see a list of clusters;  verify that the cluster you just created exists and is in the “Active” state.
 
-[Image: mng-001.png]
+<img width="1320" alt="mng-001" src="https://user-images.githubusercontent.com/252125/115579970-8589a680-a27b-11eb-979e-02d2c8d72ddf.png">
 
 Note that at the time of writing this,  eksctl creates a cluster with a default Kubernetes version of 1.18; because version 1.19 is already available, you see a link to update the new cluster. Stay with your 1.18 cluster for now.
 
@@ -52,13 +53,13 @@ aws ssm get-parameter --region [your-region] \
 
 * *API Server Endpoint and Certificate Authority.* You will need to put these into the userdata section of the launch template. Bottlerocket nodes need this userdata so that they can communicate with the cluster API; if this data is not present, the Bottlerocket nodes will launch but fail to connect to the cluster, and your transaction will fail. Go to *EKS > Cluster > [your cluster name] > Configuration > Details*. Your console screen should look similar to the screenshot below; copy the API Server Endpoint and the Certificate Authority and save those values for later use.
 
-[Image: mng-003.png]
+<img width="1304" alt="mng-003" src="https://user-images.githubusercontent.com/252125/115580223-bff34380-a27b-11eb-96d0-106fd372e957.png">
 
 ## Step 3: Create an IAM Role for Your Bottlerocket Managed Node Group
 
 This role is necessary for the kubelet daemon on your Bottlerocket nodes to be able to talk to the cluster; if it is not properly configured, the nodes will not connect to the cluster, and your node group will fail to launch.  *Follow the instructions for [Creating the Amazon EKS IAM role](https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html#create-worker-node-role)*, but where the instructions tell you to add two policies, AmazonEKSWorkerNodePolicy and AmazonEC2ContainerRegistryReadOnly, you should also add two additional policies: AmazonSSMManagedInstanceCore, so that Bottlerocket’s control container can communicate with SSM, and AmazonEKS_CNI_Policy. Click through to the Review step, where your final role should look like this:
 
-[Image: mng-004.png]
+<img width="991" alt="mng-004" src="https://user-images.githubusercontent.com/252125/115580279-cc779c00-a27b-11eb-995a-1eac8a19a5cd.png">
 
 Click the “Create” button and your new role will be created. 
 
@@ -68,7 +69,7 @@ Using eksctl to create a cluster will create all of the necessary security group
 
 To create a security group, go to *EC2 > Security Groups* and click the “Create Security Group” button. Provide a name for the security group; for the VPC pulldown, select the VPC that you recorded in Step 2. Be sure to select the right VPC; if the security group is linked to the wrong VPC, it won’t be available to you later. Next, under Inbound Rules, add a rule, type “SSH”, source “My IP”. Your new security group should look something like this:
 
-[Image: mng-new-sg-2.png]
+<img width="1568" alt="mng-new-sg-2" src="https://user-images.githubusercontent.com/252125/115580330-d4cfd700-a27b-11eb-8bae-a24d0e122a7e.png">
 
 Save your new security group.
 
@@ -108,7 +109,7 @@ Go to *EKS > Clusters > [your cluster name] > Configuration > Compute*, where yo
 
 On the next page, give your new managed node group a name. For “Node IAM Role” select the role you created in Step 3, and under “Launch Template” select “Use Launch Template”. Under “Launch Template Name” select the launch template you created in Step 4. For version, select “Version 1”. Your configuration should look something like this:
 
-[Image: mng-005.png]
+<img width="864" alt="mng-005" src="https://user-images.githubusercontent.com/252125/115580383-e1ecc600-a27b-11eb-8c68-4df927f49e46.png">
 
 Then click “Next”, where you will be able to choose the minimum, maximum, and desired size of your node group; a default of 2 is fine for this walkthrough. You can leave all other values at their defaults.
 
@@ -116,11 +117,11 @@ Click “Next” again, where you will see that a number of subnets have been au
 
 Click “Next” again. You will be shown the parameters for final review, and then click “Create”, which will start the node group creation process:
 
-[Image: mng-006.png]
+<img width="1336" alt="mng-006" src="https://user-images.githubusercontent.com/252125/115580430-ec0ec480-a27b-11eb-8f67-295ed0d43049.png">
 
 Assuming you followed all the steps, you should see your managed node group within a few minutes, with its status now set to “Active”:
 
-[Image: mng-007.png]
+<img width="1292" alt="mng-007" src="https://user-images.githubusercontent.com/252125/115580465-f29d3c00-a27b-11eb-81c5-3bd9969a0401.png">
 
 Your managed node group is now available to accept workloads. To ensure that your managed node group is running as expected, you can run the following kubectl command from your local workstation:
 
