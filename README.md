@@ -5,7 +5,7 @@ Setup EKS Managed Node Groups with Bottlerocket using Launch Templates
 
 Introduction
 
-This walkthrough is intended to get you up and running with a Managed Node Group (https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) using Bottlerocket (https://aws.amazon.com/bottlerocket/) nodes, and to familiarize you with some of the differences between a managed node group using the default Amazon Linux 2 nodes and a managed node group using Bottlerocket nodes.
+This walkthrough is intended to get you up and running with a [Managed Node Group](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) using Bottlerocket (https://aws.amazon.com/bottlerocket/) nodes, and to familiarize you with some of the differences between a managed node group using the default Amazon Linux 2 nodes and a managed node group using Bottlerocket nodes.
 
 In the future, managed node groups will support Bottlerocket as a built-in OS choice. Until then, this walkthrough should provide a reliable set of steps to build a managed node group with Bottlerocket nodes using launch templates (https://docs.aws.amazon.com/autoscaling/ec2/userguide/LaunchTemplates.html).
 
