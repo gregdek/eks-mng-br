@@ -1,21 +1,18 @@
-# eks-mng-br
-Running EKS in Managed Nodegroups with Bottlerocket
+# Setup EKS Managed Node Groups with Bottlerocket using Launch Templates
 
-Setup EKS Managed Node Groups with Bottlerocket using Launch Templates
-
-Introduction
+## Introduction
 
 This walkthrough is intended to get you up and running with a [Managed Node Group](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) using Bottlerocket (https://aws.amazon.com/bottlerocket/) nodes, and to familiarize you with some of the differences between a managed node group using the default Amazon Linux 2 nodes and a managed node group using Bottlerocket nodes.
 
 In the future, managed node groups will support Bottlerocket as a built-in OS choice. Until then, this walkthrough should provide a reliable set of steps to build a managed node group with Bottlerocket nodes using [launch templates](https://docs.aws.amazon.com/autoscaling/ec2/userguide/LaunchTemplates.html).
 
-Prerequisites
+## Prerequisites
 
 * *Basic familiarity with EKS.* For this walkthrough, we will assume some familiarity with EKS and its basic concepts, and that you have started EKS clusters successfully and have run basic workloads on them.
 * *Command-line tools.* On your local workstation, you will need to install the latest versions of [eksctl](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html), [kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html), and the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
 * *Permissions.* For this walkthrough, you should ensure that the IAM user that you use to create the eksctl cluster also has access to the AWS Management console, including [access to the EKS console](https://docs.aws.amazon.com/eks/latest/userguide/security_iam_id-based-policy-examples.html#security_iam_id-based-policy-examples-console). 
 
-Step 1: Create the Cluster and Verify Console Access
+## Step 1: Create the Cluster and Verify Console Access
 
 You’ll start by creating a simple example cluster using eksctl. It’s possible to use the AWS management console to create your cluster, but using eksctl will give you a set of simple defaults, and will also allow easy command line access later.
 
@@ -37,7 +34,7 @@ If you receive an error that your console user doesn’t have access to the clus
 
 Now it’s time to gather information about your cluster for use in later steps.
 
-Step 2: Gather Information About the Cluster
+## Step 2: Gather Information About the Cluster
 
 Here’s a list of the information you’ll need to gather, why you need it, and where to get it. Be sure to note these values for later use.
 
@@ -53,7 +50,7 @@ Here’s a list of the information you’ll need to gather, why you need it, and
 
 [Image: mng-003.png]
 
-Step 3: Create an IAM Role for Your Bottlerocket Managed Node Group
+## Step 3: Create an IAM Role for Your Bottlerocket Managed Node Group
 
 This role is necessary for the kubelet daemon on your Bottlerocket nodes to be able to talk to the cluster; if it is not properly configured, the nodes will not connect to the cluster, and your node group will fail to launch.  *Follow the instructions for [Creating the Amazon EKS IAM role](https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html#create-worker-node-role)*, but where the instructions tell you to add two policies, AmazonEKSWorkerNodePolicy and AmazonEC2ContainerRegistryReadOnly, you should also add two additional policies: AmazonSSMManagedInstanceCore, so that Bottlerocket’s control container can communicate with SSM, and AmazonEKS_CNI_Policy. Click through to the Review step, where your final role should look like this:
 
@@ -61,7 +58,7 @@ This role is necessary for the kubelet daemon on your Bottlerocket nodes to be a
 
 Click the “Create” button and your new role will be created. 
 
-Step 4: Create a security group to allow SSH access to the admin container
+## Step 4: Create a security group to allow SSH access to the admin container
 
 Using eksctl to create a cluster will create all of the necessary security groups for internal communication, but it will not create a security group allowing for ssh access. Ordinarily, the admin container is disabled so that you can’t ssh to the nodes at all, but when you want to enable ssh in the admin container, you want to be sure that you can actually connect to it.
 
@@ -71,7 +68,7 @@ To create a security group, go to *EC2 > Security Groups* and click the “Creat
 
 Save your new security group.
 
-Step 5: Create Your Launch Template
+## Step 5: Create Your Launch Template
 
 EKS added support for [EC2 Launch Templates](https://aws.amazon.com/blogs/containers/introducing-launch-template-and-custom-ami-support-in-amazon-eks-managed-node-groups/) to support custom AMIs and managed node groups, and you will use this feature to configure your template for Bottlerocket nodes. 
 
@@ -97,7 +94,7 @@ enabled = true`
 
 Save your launch template.
 
-Step 6: Launch Your Managed Node Group
+## Step 6: Launch Your Managed Node Group
 
 Now you should have all of the pieces in place to launch Bottlerocket instances into a managed node group. 
 
@@ -131,7 +128,7 @@ Now it’s time to test your ssh access to the admin container. Select one of yo
 
 You should see the admin container’s welcome message, with further instructions for how to use the admin container. Before you go into production, you should disable the admin container; simply create a new revision to the launch template and remove the admin container parameter from the user data section. The admin container can always be reenabled by connecting to the Bottlerocket control container via SSM; see the documentation (https://github.com/bottlerocket-os/bottlerocket/blob/develop/README.md#control-container) for more details.
 
-Next Steps
+## Next Steps
 
 Now that you have your managed node group running, you can more fully explore the functionality of managed node groups with your Bottlerocket nodes. 
 
