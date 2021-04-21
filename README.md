@@ -16,7 +16,9 @@ In the future, managed node groups will support Bottlerocket as a built-in OS ch
 
 You’ll start by creating a simple example cluster using eksctl. It’s possible to use the AWS management console to create your cluster, but using eksctl will give you a set of simple defaults, and will also allow easy command line access later.
 
-`eksctl create cluster --name [your-cluster-name] --region [your-region] --without-nodegroup`
+```
+eksctl create cluster --name [your-cluster-name] --region [your-region] --without-nodegroup
+```
 
 In our example, we will call our cluster “purple-goose” and build it in region us-east-2. By default, when eksctl creates a new cluster, it also creates an unmanaged node group with 2 nodes. Here we specify the extra argument `--without-nodegroup` so that you don’t have to delete those unused nodes later.
 
@@ -40,9 +42,11 @@ Here’s a list of the information you’ll need to gather, why you need it, and
 
 * *Bottlerocket AMI ID.* The simplest and most accurate way to get the latest Bottlerocket AMI ID for Kubernetes 1.18 is to run the following command on your local workstation: 
 
-`aws ssm get-parameter --region [your-region] \ 
+```
+aws ssm get-parameter --region [your-region] \ 
     --name "/aws/service/bottlerocket/aws-k8s-1.18/[x86_64|arm64]/latest/image_id" \
-    --query Parameter.Value --output text`
+    --query Parameter.Value --output text
+```
 
 * *Cluster VPC ID.* You will need this later when to add security rules. In the console, go to *EKS > Clusters > [your cluster name] > Configuration > Networking*. You will find the VPC of your cluster here; record the VPC ID for later use. 
 
@@ -85,12 +89,14 @@ There are several fields that you might choose to set, but for this walkthrough,
 * *Security Groups.* You will select two security groups here: the ssh security group that you created in Step 4, and the Cluster Security Group. When eksctl creates a cluster, it creates several security groups. One of these is the Cluster Security Group, which is a unified security group that allows communication between all components. You can easily identify this security group because it begins with eks-cluster-sg-[your-cluster-name]. Choose “select existing security groups”, then from the pulldown menu, choose the Cluster Security Group, and the ssh security group that you created in Step 4.
 * *Advanced details / User data.* This is critically important. If any data in this field is absent or malformed, the nodes will not be able to connect to the cluster. Below is a sample user data, which provides the necessary settings to Kubernetes and also enables the admin container on the Bottlerocket hosts. Use the following format below, and replace the cluster name, API server, and cluster certificate fields with the the data you collected in Step 2. Note also that we have enabled the admin container to test our ability to ssh to the nodes; in future revisions of the launch template, you should remove this option, since the admin container should only be running for debugging or troubleshooting situations. Cut and paste the resulting user data settings into the “Advanced Settings / User data” field at the bottom of the launch template.
 
-`[settings.kubernetes]
+```
+[settings.kubernetes]
 cluster-name = "[your-cluster-name]"
 api-server = "[api-server-url]"
 cluster-certificate = "[full certificate here]"
 [settings.host-containers.admin]
-enabled = true`
+enabled = true
+```
 
 Save your launch template.
 
@@ -118,13 +124,17 @@ Assuming you followed all the steps, you should see your managed node group with
 
 Your managed node group is now available to accept workloads. To ensure that your managed node group is running as expected, you can run the following kubectl command from your local workstation:
 
-`kubectl get nodes -o wide`
+```
+kubectl get nodes -o wide
+```
 
 You should see that your Bottlerocket nodes are up and running, and you should see public IP addresses for your nodes. 
 
 Now it’s time to test your ssh access to the admin container. Select one of your nodes and run the following command:
 
-`ssh -i /path/to/your-ssh-key ec2user@[node-public-ip-address]`
+```
+ssh -i /path/to/your-ssh-key ec2user@[node-public-ip-address]
+```
 
 You should see the admin container’s welcome message, with further instructions for how to use the admin container. Before you go into production, you should disable the admin container; simply create a new revision to the launch template and remove the admin container parameter from the user data section. The admin container can always be reenabled by connecting to the Bottlerocket control container via SSM; see the documentation (https://github.com/bottlerocket-os/bottlerocket/blob/develop/README.md#control-container) for more details.
 
