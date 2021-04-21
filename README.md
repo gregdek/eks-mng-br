@@ -136,7 +136,7 @@ Now it’s time to test your ssh access to the admin container. Select one of yo
 ssh -i /path/to/your-ssh-key ec2user@[node-public-ip-address]
 ```
 
-You should see the admin container’s welcome message, with further instructions for how to use the admin container. Before you go into production, you should disable the admin container; simply create a new revision to the launch template and remove the admin container parameter from the user data section. The admin container can always be reenabled by connecting to the Bottlerocket control container via SSM; see the documentation (https://github.com/bottlerocket-os/bottlerocket/blob/develop/README.md#control-container) for more details.
+You should see the admin container’s welcome message, with further instructions for how to use the admin container. Before you go into production, you should disable the admin container; simply create a new revision to the launch template and remove the admin container parameter from the user data section. The admin container can always be reenabled by connecting to the Bottlerocket control container via SSM; see the [documentation](https://github.com/bottlerocket-os/bottlerocket/blob/develop/README.md#control-container) for more details.
 
 ## Next Steps
 
